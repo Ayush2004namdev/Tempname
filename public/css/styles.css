@@ -1,0 +1,49 @@
+/* Dark theme CSS */
+body {
+    background-color: #121212;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+}
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+input[type="text"], input[type="text"], button {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #333333;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+}
+button {
+    cursor: pointer;
+    background-color: #007BFF;
+}
+button:hover {
+    background-color: #0056b3;
+}
+.values{
+    display: flex;
+}
+.values>h1{
+    width: 190%;
+}
+.values>h2{
+    width: 190%;
+}
+.values>input{
+    width: 20%;
+}
+h3{
+    width: 90%;
+    display: inline-block;
+}
+.slide1>h1{
+    margin: 40px 0;
+}
+.none{
+    display: none;
+}
