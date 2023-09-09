@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const directSchema = new mongoose.Schema({
     date:String,
     agraDirect: Number,
@@ -9,6 +11,6 @@ const directSchema = new mongoose.Schema({
 });
  
 
-const Direct = mongoose.model('Direct', personSchema);
+const Direct = mongoose.model('Direct', directSchema);
   
-module.exports = Freight;
+module.exports = Direct;

@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const valueSchema = new mongoose.Schema({
     date:String,
     loose_price: Number,
@@ -8,6 +10,6 @@ const valueSchema = new mongoose.Schema({
   });
   
   
-  const Value = mongoose.model('Value', personSchema);
+  const Value = mongoose.model('Value', valueSchema);
   
   module.exports = Value;

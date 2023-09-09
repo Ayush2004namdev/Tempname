@@ -1,3 +1,5 @@
+const mongoose = require('mongoose')
+
 const freightSchema = new mongoose.Schema({
     date:String,
     agraFrigit: Number,
@@ -9,6 +11,6 @@ const freightSchema = new mongoose.Schema({
 });
  
 
-const Freight = mongoose.model('Freight', personSchema);
+const Freight = mongoose.model('Freight', freightSchema);
   
 module.exports = Freight;

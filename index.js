@@ -4,6 +4,10 @@ const path = require('path')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const res = require('express/lib/response');
+const Value = require('./schemas/Values');
+const Freight = require('./schemas/Freight');
+const Direct = require('./schemas/DirectRates');
+const Cfa = require('./schemas/CfaRats');
 const app = express()
 
 const public = path.join(__dirname , '/path')
@@ -13,6 +17,8 @@ mongoose.connect('mongodb://127.0.0.1/rates',{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
+
+let flag = false;
 
 let userData = {}
 let frigitRates = {}
@@ -25,10 +31,13 @@ ExPlant: '',
 delhi : ''
 }
 
+const date = new Date()
+let todaydate = `${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`
+
 
 let directRates = {
   agra : '',
-  chandighart : '',
+  chandighar : '',
   damtal: '',
   dehradun : '',
   ExPlant : '',
@@ -58,22 +67,6 @@ app.get('/' , (req , res)=> {
 app.get('/frigitRates' , async(req , res)=> {
     const {loose} = req.query
     userData.loose = loose
-
-    // try {
-    //     // Create a new Person document based on the request body
-    //     console.log(loose)
-    //     const newPerson = new Person({
-    //        loose
-    //     });
-    
-    //     // Save the document to the database
-    //     await newPerson.save();
-    
-    //     console.log(newPerson)
-    //   } catch (error) {
-    //     console.error('Error adding person:', error);
-    //     res.status(500).json({ error: 'Could not add person to the database' });
-    //   }
     res.render('secondpage')
 })
 
@@ -103,6 +96,7 @@ app.get('/selectState' , (req , res) => {
 })
 
 app.get('/cfa' , (req , res) => {
+  flag = true
   res.render("fifthpage")
 })
 
@@ -123,6 +117,7 @@ app.get('/directprice' , (req , res) => {
 })
 
 let state = ''
+
 
 app.get('/prices' , (req , res) => {
   
@@ -149,14 +144,85 @@ function calculate(cfsrate , frigitrate , directrate){
 
 
 app.get('/results' , async(req , res) => {
+  const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
+  const {agra , delhi , dehradun , damtal , ExPlant , chandighar} = frigitRates
   state = req.query.state
   console.log(state)
   let cfsrate = cfaRates[state]
   let directrate = directRates[state]
   let frigitrate = frigitRates[state]
   const {dataTin , dataPouch} = await calculate(cfsrate , frigitrate , directrate)
-  console.log({cfsrate , frigitrate , directrate})
-  res.render('eighthpage' , {
+
+  try{
+    const newValue = new Value({
+      date:todaydate,
+      loose_price:loose,
+      packing_cost_tin:packingCostTin,
+      intrest_tin:intrestTin,
+      packing_cost_pouch:packingCostPouch,
+      intrest_pouch:intrestPouch
+    });
+    await newValue.save();
+    console.log({newValue})
+
+    const newFrigitRate = new Freight({
+
+      date:todaydate,
+      agraFrigit: agra,
+      chandigharFrigit:chandighar,
+      damtalFrigit:damtal,
+      dehradunFrigit:dehradun,
+      ExPlantFrigit:ExPlant,
+      delhiFrigit:delhi,
+    })
+
+    await newFrigitRate.save();
+    console.log({newFrigitRate})
+
+    if(!flag){
+
+    const newDirectRate = new Direct({
+
+      date:todaydate,
+      agraDirect: directRates.agra,
+      chandigharDirect:directRates.chandighar,
+      damtalDirect:directRates.damtal,
+      dehradunDirect:directRates.dehradun,
+      ExPlantDirect:directRates.ExPlant,
+      delhiDirect:directRates.delhi,
+    })
+    await newDirectRate.save();
+    console.log({newDirectRate})
+
+  }else{
+
+    const newcfaRate = new Cfa({
+      date:todaydate,
+      agraCfa: cfaRates.agra,
+      chandigharCfa:cfaRates.chandighar,
+      damtalCfa:cfaRates.damtal,
+      dehradunCfa:cfaRates.dehradun,
+      ExPlantCfa:cfaRates.ExPlant,
+      delhiCfa:cfaRates.delhi,
+    })
+    await newcfaRate.save();
+    console.log({newcfaRate})
+
+  }
+
+  }catch(err){
+    console.log('error creating the database ' + err)
+  }
+
+  let types
+  if(flag == true) {
+    types = "cfa"
+  }
+  else{
+    types = 'direct'
+  }
+  res.render('ninthpage' , {
+    types,
    state,
    dataPouch,
    dataTin 
@@ -167,3 +233,4 @@ app.get('/results' , async(req , res) => {
 app.listen(3000 , (err) => {
     err ? console.log(err) : console.log(`server running on port ${3000}`)
 })
+
