@@ -1,5 +1,6 @@
 const express = require('express')
 const hbs = require('hbs')
+require('dotenv').config()
 const path = require('path')
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -13,7 +14,7 @@ const app = express()
 const public = path.join(__dirname , '/path')
 app.use(bodyParser.urlencoded({ extended: false }));
 
-mongoose.connect('mongodb://127.0.0.1/rates',{
+mongoose.connect(process.env.MONGO_URI,{
     useNewUrlParser: true,
     useUnifiedTopology: true,
 })
@@ -230,7 +231,7 @@ app.get('/results' , async(req , res) => {
 })
 
 
-app.listen(3000 , (err) => {
+app.listen(process.env.PORT , (err) => {
     err ? console.log(err) : console.log(`server running on port ${3000}`)
 })
 
