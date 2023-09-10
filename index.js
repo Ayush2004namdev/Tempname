@@ -14,10 +14,16 @@ const app = express()
 const public = path.join(__dirname , '/path')
 app.use(bodyParser.urlencoded({ extended: false }));
 
-mongoose.connect(process.env.MONGO_URI,{
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+const connectdb = async()=> {
+  try{
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+  }catch(err){
+    console.log('error connecting' , err)
+  }
+}
+
+
 
 let flag = false;
 
@@ -44,14 +50,6 @@ let directRates = {
   ExPlant : '',
   delhi : ''
 }
-
-const db = mongoose.connection;
-db.on('error', (err) => {
-    console.error('MongoDB connection error:', err);
-  });
-  db.once('open', () => {
-    console.log('Connected to MongoDB');
-  });
 
 app.use(express.static('public'))
 app.set('/css' , path.join(__dirname , '/public/css'))
@@ -230,8 +228,10 @@ app.get('/results' , async(req , res) => {
   })
 })
 
-
-app.listen(process.env.PORT , (err) => {
+connectdb().then(()=>{
+  app.listen(process.env.PORT , (err) => {
     err ? console.log(err) : console.log(`server running on port ${3000}`)
 })
+})
+
 
