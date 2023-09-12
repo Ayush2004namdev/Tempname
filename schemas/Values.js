@@ -7,6 +7,10 @@ const valueSchema = new mongoose.Schema({
     intrest_tin:Number,
     packing_cost_pouch:Number,
     intrest_pouch:Number,
+    state:String,
+    RouteType : String,
+    ratesTin:Number,
+    ratesPouch:Number
   });
   
   

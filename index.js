@@ -133,9 +133,11 @@ app.get('/prices' , (req , res) => {
 
 function calculate(cfsrate , frigitrate , directrate){
   const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
-  const dataTin = loose*15 + 15.94*frigitrate + + packingCostTin + +intrestTin + + directrate + + cfsrate + + (loose*15 + 15.94*frigitrate + packingCostTin +intrestTin + directrate + cfsrate)*5/100
-  const dataPouch = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + directrate + + cfsrate + + (loose*0.91 + 0.97*frigitrate + packingCostPouch +intrestPouch + directrate + cfsrate)*5/100
-  console.log({dataTin , dataPouch})
+  console.log({loose , frigitrate, packingCostTin , intrestTin , directrate , cfsrate })
+  const add = loose*15 + + 15.94*frigitrate + + packingCostTin + +intrestTin + + directrate + + cfsrate 
+  const dataTin = add * 0.05 + add
+  const add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + directrate + + cfsrate 
+  const dataPouch = add2*0.05 + add2
   return {
     dataTin , dataPouch
   }
@@ -147,23 +149,44 @@ app.get('/results' , async(req , res) => {
   const {agra , delhi , dehradun , damtal , ExPlant , chandighar} = frigitRates
   state = req.query.state
   console.log(state)
-  let cfsrate = cfaRates[state]
+  let cfarate = cfaRates[state]
   let directrate = directRates[state]
   let frigitrate = frigitRates[state]
-  const {dataTin , dataPouch} = await calculate(cfsrate , frigitrate , directrate)
+  const {dataTin , dataPouch} = await calculate(cfarate , frigitrate , directrate)
 
   try{
+    if(flag == true){
+      const newValue = new Value({
+      date:todaydate,
+      loose_price:loose,
+      packing_cost_tin:packingCostTin,
+      intrest_tin:intrestTin,
+      packing_cost_pouch:packingCostPouch,
+      intrest_pouch:intrestPouch,
+      state:state,
+      RouteType:'CFA',
+      ratesTin:dataTin,
+      ratesPouch:dataPouch
+    })
+    await newValue.save();
+    console.log({newValue})
+  }
+  else{
     const newValue = new Value({
       date:todaydate,
       loose_price:loose,
       packing_cost_tin:packingCostTin,
       intrest_tin:intrestTin,
       packing_cost_pouch:packingCostPouch,
-      intrest_pouch:intrestPouch
-    });
+      intrest_pouch:intrestPouch,
+      state:state,
+      RouteType:'Direct',
+      ratesTin:dataTin,
+      ratesPouch:dataPouch
+    })
     await newValue.save();
     console.log({newValue})
-
+  }
     const newFrigitRate = new Freight({
 
       date:todaydate,
@@ -181,7 +204,6 @@ app.get('/results' , async(req , res) => {
     if(!flag){
 
     const newDirectRate = new Direct({
-
       date:todaydate,
       agraDirect: directRates.agra,
       chandigharDirect:directRates.chandighar,
