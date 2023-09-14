@@ -137,9 +137,9 @@ app.get('/prices' , (req , res) => {
 
 function calculate(cfsrate , frigitrate , directrate){
   const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
-  const add = loose*15 + + 15.94*frigitrate + + packingCostTin + +intrestTin + + directrate + + cfsrate/12
+  const add = loose*15 + + 15.94*frigitrate + + packingCostTin + +intrestTin + + directrate + + cfsrate
   const dataTin = add * 0.05 + add
-  const add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + directrate + + cfsrate 
+  const add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + directrate + + cfsrate/12
   const dataPouch = add2*0.05 + add2
   return {
     dataTin , dataPouch
