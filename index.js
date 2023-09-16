@@ -62,7 +62,7 @@ app.set('view engine' , 'hbs')
 
 app.get('/' , async (req , res)=> {
     
-    res.render('firstpage' )
+    res.render('firstpage' , {todaydate})
 })
 
 app.get('/frigitRates' , async(req , res)=> {
