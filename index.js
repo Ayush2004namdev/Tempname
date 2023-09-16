@@ -72,7 +72,7 @@ app.get('/frigitRates' , async(req , res)=> {
     res.render('secondpage' , {frieghtrates})
 })
 
-app.get('/selectoptions' , (req , res)=> {
+app.get('/selectoptions' , async (req , res)=> {
   const {agra , chandighar , damtal , dehradun , ExPlant , delhi} = req.query
   frigitRates.agra = agra
   frigitRates.chandighar = chandighar
@@ -81,7 +81,8 @@ app.get('/selectoptions' , (req , res)=> {
   frigitRates.ExPlant = ExPlant
   frigitRates.delhi = delhi
   // console.log(frigitRates)
-  res.render('fourthpage')
+  let cfarates = await Cfa.findById('64fef9293351baee48f48322')
+  res.render("fifthpage" , {cfarates})
 })
 
 app.get('/selectState' , (req , res) => {
@@ -97,9 +98,7 @@ app.get('/selectState' , (req , res) => {
 })
 
 app.get('/cfa' , async(req , res) => {
-  flag = true
-  let cfarates = await Cfa.findById('64fef9293351baee48f48322')
-  res.render("fifthpage" , {cfarates})
+  
 })
 
 app.get('/direct' , (req , res) => {
@@ -115,6 +114,14 @@ app.get('/direct' , (req , res) => {
 })
 
 app.get('/directprice' , async (req , res) => {
+  const {agra , chandighar , damtal , dehradun , ExPlant , delhi} = req.query
+  cfaRates.agra = agra
+  cfaRates.chandighar = chandighar
+  cfaRates.damtal = damtal
+  cfaRates.dehradun = dehradun
+  cfaRates.ExPlant = ExPlant
+  cfaRates.delhi = delhi
+  // console.log(cfaRates)
   let rates = await Direct.findById('65002b29a43b26ff472c7ef7')
       res.render('sisxtpage' , {rates})
 })
@@ -132,32 +139,58 @@ app.get('/prices' , (req , res) => {
   cfaRates.ExPlant = ExPlant
   cfaRates.delhi = delhi
   // console.log(cfaRates)
-  res.render("seventpage")
+  res.render("seventpage")  
 })
 
-function calculate(cfsrate , frigitrate , directrate){
+function calculate(frigitrate , rate , flag){
   const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
-  const add = loose*15 + + 15.94*frigitrate + + packingCostTin + +intrestTin + + directrate + + cfsrate
-  const dataTin = add * 0.05 + add
-  const add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + directrate + + cfsrate/12
-  const dataPouch = add2*0.05 + add2
+  console.log({loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch , rate ,flag})
+  const add = loose*15 + + 15.94*frigitrate + + packingCostTin + +intrestTin + + rate
+  const datatin = add * 0.05 + add
+  let add2
+  if(flag == true){
+    add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + rate/12
+  }
+  else{
+    add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + + intrestPouch + +  rate
+  }
+  
+  const datapouch = add2*0.05 + add2
   return {
-    dataTin , dataPouch
+    datatin , datapouch
   }
 }
+
+app.get('/selectRoute' , (req , res) => {
+  state = req.query.state
+  res.render('fourthpage')
+})
+
+app.get('/cfaRoute' , (req , res)=> {
+  flag = true
+  res.redirect('/results')
+})
+
+app.get('/directRoute' , (req , res)=> {
+  flag = false
+  res.redirect('/results')
+})
+
 
 
 app.get('/results' , async(req , res) => {
   const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
   const {agra , delhi , dehradun , damtal , ExPlant , chandighar} = frigitRates
-  state = req.query.state
+
   let cfarate = cfaRates[state]
   let directrate = directRates[state]
   let frigitrate = frigitRates[state]
-  const {dataTin , dataPouch} = await calculate(cfarate , frigitrate , directrate)
-
+  let dataTin,dataPouch
   try{
     if(flag == true){
+    const {datatin , datapouch} = calculate(frigitrate , cfarate,flag)
+    dataTin = datatin
+    dataPouch = datapouch
       const newValue = new Value({
       date:todaydate,
       loose_price:loose,
@@ -174,6 +207,9 @@ app.get('/results' , async(req , res) => {
 
   }
   else{
+    const {datatin , datapouch} = calculate(frigitrate , directrate,flag)
+    dataTin = datatin
+    dataPouch = datapouch
     const newValue = new Value({
       date:todaydate,
       loose_price:loose,
