@@ -152,14 +152,16 @@ function calculate(frigitrate , rate , flag){
     add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + +intrestPouch + + rate/12
   }
   else{
-    add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + + intrestPouch + +  rate
+    add2 = loose*0.91 + 0.97*frigitrate + + packingCostPouch + + intrestPouch + +  rate/12
   }
   
   const datapouch = add2*0.05 + add2
   return {
     datatin , datapouch
   }
-}
+}  
+
+
 
 app.get('/selectRoute' , (req , res) => {
   state = req.query.state
@@ -182,9 +184,9 @@ app.get('/results' , async(req , res) => {
   const {loose , packingCostTin , intrestTin, packingCostPouch , intrestPouch} = userData
   const {agra , delhi , dehradun , damtal , ExPlant , chandighar} = frigitRates
 
-  let cfarate = cfaRates[state]
-  let directrate = directRates[state]
-  let frigitrate = frigitRates[state]
+  let cfarate = parseFloat(cfaRates[state])
+  let directrate = parseFloat(directRates[state])
+  let frigitrate = parseFloat(frigitRates[state])
   let dataTin,dataPouch
   try{
     if(flag == true){
@@ -207,9 +209,10 @@ app.get('/results' , async(req , res) => {
 
   }
   else{
-    const {datatin , datapouch} = calculate(frigitrate , directrate,flag)
-    dataTin = datatin
-    dataPouch = datapouch
+    const {datatin , datapouch} = calculate(frigitrate , cfarate,flag)
+    console.log({datatin , datapouch , directrate})
+    dataTin = datatin + + directrate
+    dataPouch = datapouch + + directrate/12
     const newValue = new Value({
       date:todaydate,
       loose_price:loose,
